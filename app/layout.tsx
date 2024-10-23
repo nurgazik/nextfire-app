@@ -5,7 +5,6 @@ import './globals.css';
 import Navbar from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import Providers from './lib/Providers';
-import { UserContext } from './lib/context';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

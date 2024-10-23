@@ -1,41 +1,34 @@
 import Image from "next/image";
 import Link from 'next/link';
 import Loader from "./components/Loader";
-import TestComponent from "./components/TestComponent";
-import ToastButton from "./components/ToastButton";
+import { Timestamp, collection, collectionGroup, getDocs, limit, orderBy, query, startAfter, where } from 'firebase/firestore';
+import { db } from '../app/lib/firebase'
+import PostFeed from '../app/components/PostFeed';
+import { Post } from '../app/lib/types'
+import { postToJSON } from '../app/lib/firebase';
+import { useState } from 'react';
+import HomeContent from "./components/HomeContent";
 
-export const metadata = {
-  title: 'Your Page Title',
-  description: 'Your page description',
-};
+const POSTS_PER_PAGE = 5;
 
-export default function Home() {
-  return (
-    <div>
-      <h1>There should be a loader here yo brother</h1>
-      <Loader show={true} />
-      <TestComponent/>
-      <ToastButton 
-        type="success" 
-        message="Operation successful!" 
-        buttonText="Show Success Toast" 
-      />
-      <ToastButton 
-        type="error" 
-        message="An error occurred." 
-        buttonText="Show Error Toast" 
-      />
-      <ToastButton 
-        type="loading" 
-        message="Loading..." 
-        buttonText="Show Loading Toast" 
-      />
-      <ToastButton 
-        type="custom" 
-        message="Custom toast message" 
-        buttonText="Show Custom Toast" 
-        options={{ icon: '👋' }}
-      />
-    </div>
+// Types
+interface HomePageProps {
+  initialPosts: Post[];
+}
+
+async function getInitialPosts(): Promise<Post[]> {
+  const postsQuery = query(
+    collectionGroup(db, 'posts'),
+    where('published', '==', true),
+    orderBy('createdAt', 'desc'),
+    limit(POSTS_PER_PAGE)
   );
+
+  const snapshot = await getDocs(postsQuery);
+  return snapshot.docs.map(postToJSON);
+}
+
+export default async function HomePage() {
+  const initialPosts = await getInitialPosts();
+  return <HomeContent initialPosts={initialPosts} />;
 }
