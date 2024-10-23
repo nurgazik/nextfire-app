@@ -1,4 +1,3 @@
-// components/PostFeed.tsx
 import Link from 'next/link';
 import React from 'react';
 
@@ -31,16 +30,14 @@ function PostItem({ post, admin = false }: PostItemProps) {
 
   return (
     <div className="card">
+      {/* Corrected Link component without <a> */}
       <Link href={`/${post.username}`}>
-        <a>
-          <strong>By @{post.username}</strong>
-        </a>
+        <strong>By @{post.username}</strong>
       </Link>
 
+      {/* Corrected Link component without <a> */}
       <Link href={`/${post.username}/${post.slug}`}>
-        <h2>
-          <a>{post.title}</a>
-        </h2>
+        <h2>{post.title}</h2>
       </Link>
 
       <footer>

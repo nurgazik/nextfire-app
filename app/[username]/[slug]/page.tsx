@@ -1,5 +1,3 @@
-// app/[username]/page.tsx
-
 import { getUserWithUsername, postToJSON } from '../../lib/firebase';
 import UserProfile from '../../components/UserProfile';
 import PostFeed from '../../components/PostFeed';
@@ -14,6 +12,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
 } from 'firebase/firestore';
+import { db } from '../../lib/firebase'; // Import the Firestore instance
 
 interface User {
   photoURL: string | null;
@@ -47,10 +46,11 @@ const UserProfilePage = async ({ params }: { params: Params }) => {
   if (userDoc) {
     user = userDoc.data() as User;
 
-    const postsRef = collection(userDoc.ref, 'posts') as CollectionReference<DocumentData>;
+    const postsRef = collection(db, 'posts') as CollectionReference<DocumentData>;
 
     const postsQuery = firestoreQuery(
       postsRef,
+      where('username', '==', username),
       where('published', '==', true),
       orderBy('createdAt', 'desc'),
       limit(5)
