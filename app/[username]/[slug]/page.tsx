@@ -44,10 +44,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const posts = await getDocs(postsQuery);
   const post = posts.docs[0]?.data();
+  const title = post?.title || 'Post';
+  const description = post?.content ? `${post.content.substring(0, 160)}...` : undefined;
 
   return {
-    title: post?.title || 'Post',
-    description: post?.content ? `${post.content.substring(0, 160)}...` : undefined
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      authors: [`@${username}`]
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      creator: `@${username}`
+    }
   };
 }
 
