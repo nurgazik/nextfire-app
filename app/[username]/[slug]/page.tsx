@@ -1,72 +1,89 @@
-import { getUserWithUsername, postToJSON } from '../../lib/firebase';
-import UserProfile from '../../components/UserProfile';
-import PostFeed from '../../components/PostFeed';
-import {
-  collection,
-  where,
-  getDocs,
-  query as firestoreQuery,
-  limit,
-  orderBy,
-  CollectionReference,
-  DocumentData,
-  QueryDocumentSnapshot,
-} from 'firebase/firestore';
-import { db } from '../../lib/firebase'; // Import the Firestore instance
+// app/[username]/[slug]/page.tsx
+import { getUserWithUsername } from '@/app/lib/firebase';
+import { Post } from '@/app/lib/types';
+import PostContent from './PostContent';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/app/lib/firebase';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-interface User {
-  photoURL: string | null;
-  username: string;
-  displayName: string | null;
+interface Props {
+  params: {
+    username: string;
+    slug: string;
+  };
 }
 
-interface Post {
-  slug: string;
-  username: string;
-  title: string;
-  content: string;
-  heartCount?: number;
-  published?: boolean;
-  createdAt: number;
-  updatedAt?: number;
+function convertFirestorePost(data: any): Post | null {
+  if (!data) return null;
+
+  return {
+    ...data,
+    createdAt: data.createdAt?.toMillis() || 0,
+    updatedAt: data.updatedAt?.toMillis() || 0
+  } as Post;
 }
 
-interface Params {
-  username: string;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username, slug } = params;
+  const userDoc = await getUserWithUsername(username);
+  
+  if (!userDoc) {
+    return {
+      title: 'Post Not Found'
+    };
+  }
+
+  // Query posts collection where slug matches
+  const postsQuery = query(
+    collection(db, 'posts'),
+    where('slug', '==', slug),
+    where('username', '==', username),
+    limit(1)
+  );
+
+  const posts = await getDocs(postsQuery);
+  const post = posts.docs[0]?.data();
+
+  return {
+    title: post?.title || 'Post',
+    description: post?.content ? `${post.content.substring(0, 160)}...` : undefined
+  };
 }
 
-const UserProfilePage = async ({ params }: { params: Params }) => {
-  const { username } = params;
+export default async function PostPage({ params }: Props) {
+  const { username, slug } = params;
+  console.log('Looking for post:', { username, slug });
 
   const userDoc = await getUserWithUsername(username);
 
-  let user: User | null = null;
-  let posts: Post[] = [];
-
-  if (userDoc) {
-    user = userDoc.data() as User;
-
-    const postsRef = collection(db, 'posts') as CollectionReference<DocumentData>;
-
-    const postsQuery = firestoreQuery(
-      postsRef,
-      where('username', '==', username),
-      where('published', '==', true),
-      orderBy('createdAt', 'desc'),
-      limit(5)
-    );
-
-    const postsSnapshot = await getDocs(postsQuery);
-
-    posts = postsSnapshot.docs.map((doc) => postToJSON(doc as QueryDocumentSnapshot<Post>));
+  if (!userDoc) {
+    console.log('User not found');
+    notFound();
   }
 
-  return (
-    <main>
-      {user && <UserProfile user={user} />}
-      {posts.length > 0 && <PostFeed posts={posts} />}
-    </main>
+  // Query posts collection where slug matches
+  const postsQuery = query(
+    collection(db, 'posts'),
+    where('slug', '==', slug),
+    where('username', '==', username),
+    limit(1)
   );
-};
 
-export default UserProfilePage;
+  const posts = await getDocs(postsQuery);
+  
+  if (posts.empty) {
+    console.log('No matching post found');
+    notFound();
+  }
+
+  const postDoc = posts.docs[0];
+  const post = convertFirestorePost(postDoc.data());
+
+  if (!post) {
+    console.log('Failed to convert post data');
+    notFound();
+  }
+
+  return <PostContent postRef={postDoc.ref.path} post={post} />;
+}

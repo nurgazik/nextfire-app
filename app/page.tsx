@@ -1,3 +1,4 @@
+//app/page.tsx (Home Page)
 import Image from "next/image";
 import Link from 'next/link';
 import Loader from "./components/Loader";
