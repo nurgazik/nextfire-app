@@ -17,13 +17,16 @@ interface HomeContentProps {
   export default function HomeContent({ initialPosts }: HomeContentProps) {
     const [posts, setPosts] = useState<Post[]>(initialPosts);
     const [loading, setLoading] = useState(false);
-    const [postsEnd, setPostsEnd] = useState(false);
+    const [postsEnd, setPostsEnd] = useState(false)
   
     const getMorePosts = async () => {
       setLoading(true);
       const last = posts[posts.length - 1];
   
-      const cursor = Timestamp.fromMillis(last.createdAt);
+      // Wherever you're using Timestamp.fromMillis
+const cursor = typeof last.createdAt === 'number' 
+? Timestamp.fromMillis(last.createdAt)
+: last.createdAt;
   
       const postsQuery = query(
         collectionGroup(db, 'posts'),

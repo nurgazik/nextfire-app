@@ -268,3 +268,49 @@ input[type="file"] {
   font-size: 24px;
   color: darkblue;
 }
+
+/* Add these to your globals.css */
+
+/* Admin Edit Post Layout */
+.container {
+  display: flex;
+  gap: 2rem;
+}
+
+.container section {
+  flex: 1; /* Takes up remaining space */
+}
+
+.container aside {
+  width: 200px;
+  position: sticky;
+  top: 80px; /* Accounts for your navbar height */
+  height: fit-content;
+}
+
+/* Admin Edit Post Controls */
+.controls {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-gray);
+}
+
+.controls textarea {
+  width: 100%;
+  min-height: 60vh;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-family: var(--font-geist-mono);
+  font-size: 1rem;
+  line-height: 1.5;
+  background: white;
+  border: 1px solid var(--color-gray);
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.controls textarea:focus {
+  outline: none;
+  border-color: var(--color-blue);
+}

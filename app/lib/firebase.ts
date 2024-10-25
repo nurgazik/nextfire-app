@@ -1,7 +1,12 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, collection, where, getDocs, query, limit, QueryDocumentSnapshot, DocumentData, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, where, getDocs, query, limit, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { 
+    // ... your existing imports
+    serverTimestamp as firebaseServerTimestamp,
+    FieldValue 
+  } from 'firebase/firestore';
 
 
 const firebaseConfig = {
@@ -29,13 +34,12 @@ const googleAuthProvider = new GoogleAuthProvider();
 
 export { auth, googleAuthProvider, db, storage };
 
-
-
 /**
  * Gets a users/{uid} document with username
  * @param  {string} username
  * @returns {Promise<QueryDocumentSnapshot | undefined>} - Returns the user document or undefined if not found
  */
+
 export async function getUserWithUsername(username: string): Promise<QueryDocumentSnapshot | undefined> {
   const usersRef = collection(db, 'users');
   const q = query(usersRef, where('username', '==', username), limit(1));
@@ -77,3 +81,6 @@ interface FirestorePost {
       updatedAt: data.updatedAt?.toMillis(),
     };
   }
+
+  export const serverTimestamp = firebaseServerTimestamp;
+
