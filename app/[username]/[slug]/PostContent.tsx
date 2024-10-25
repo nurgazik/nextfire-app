@@ -8,6 +8,8 @@ import { db } from '@/app/lib/firebase';
 import { Post } from '@/app/lib/types';
 import ReactMarkdown from 'react-markdown';
 import Loader from '@/app/components/Loader';
+import AuthCheck from '@/app/components/AuthCheck';
+import HeartButton from '@/app/components/HeartButton';
 
 interface PostContentProps {
   post: Post;
@@ -30,30 +32,39 @@ export default function PostContent({ post: initialPost, postRef }: PostContentP
     ? new Date(post.createdAt)
     : post.createdAt;
 
-  return (
-    <div className="prose prose-lg max-w-4xl mx-auto">
-      <h1>{post?.title}</h1>
-      <span className="text-sm">
-        Written by{' '}
-        <Link href={`/${post.username}/`} className="text-blue-600 hover:text-blue-800">
-          @{post.username}
-        </Link>{' '}
-        on {createdAt.toISOString().split('T')[0]}
-      </span>
-
-      {loading ? (
-        <Loader show={true} />
-      ) : (
-        <ReactMarkdown className="mt-8">
-          {post?.content}
-        </ReactMarkdown>
-      )}
-
-      <aside className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <p>
-          <strong>{post.heartCount || 0} 🤍</strong>
-        </p>
-      </aside>
-    </div>
-  );
+    return (
+        <div className="prose prose-lg max-w-4xl mx-auto">
+          <h1>{post?.title}</h1>
+          <span className="text-sm">
+            Written by{' '}
+            <Link href={`/${post.username}/`} className="text-blue-600 hover:text-blue-800">
+              @{post.username}
+            </Link>{' '}
+            on {createdAt.toISOString().split('T')[0]}
+          </span>
+    
+          {loading ? (
+            <Loader show={true} />
+          ) : (
+            <ReactMarkdown className="mt-8">
+              {post?.content}
+            </ReactMarkdown>
+          )}
+    
+          <aside className="mt-8 p-4 bg-gray-100 rounded-lg">
+            <p>
+              <strong>{post.heartCount || 0} 🤍</strong>
+            </p>
+            <AuthCheck
+              fallback={
+                <Link href="/enter">
+                  <button>💗 Sign Up</button>
+                </Link>
+              }
+            >
+              <HeartButton postRef={postRef} />
+            </AuthCheck>
+          </aside>
+        </div>
+    );
 }
