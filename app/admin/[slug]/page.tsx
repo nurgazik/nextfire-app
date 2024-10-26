@@ -50,23 +50,21 @@ function PostManager() {
               <button className="btn-blue">Live view</button>
             </Link>
             <ImageUploader 
-              onImageUploaded={(url) => {
-                // Optional: You can automatically insert the image URL into the content
-                // This is just one way to handle it - you could also just let users copy the URL
-                const textarea = document.querySelector('textarea');
-                if (textarea) {
-                  const imageMarkdown = `![alt](${url})`;
-                  console.log('Inserting markdown:', imageMarkdown); // Add this
-                  const start = textarea.selectionStart;
-                  const end = textarea.selectionEnd;
-                  const text = textarea.value;
-                  textarea.value = text.substring(0, start) + imageMarkdown + text.substring(end);
-                  // Trigger form change
-                  const event = new Event('input', { bubbles: true });
-                  textarea.dispatchEvent(event);
-                }
-              }} 
-            />
+  onImageUploaded={(url) => {
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      // Wrap URL in angle brackets to escape special characters
+      const imageMarkdown = `![alt](<${url}>)`;
+      console.log('Inserting markdown:', imageMarkdown);
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+      textarea.value = text.substring(0, start) + imageMarkdown + text.substring(end);
+      const event = new Event('input', { bubbles: true });
+      textarea.dispatchEvent(event);
+    }
+  }} 
+/>
 
           </aside>
         </>
